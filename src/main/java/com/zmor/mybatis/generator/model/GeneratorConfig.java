@@ -67,6 +67,8 @@ public class GeneratorConfig {
 
     private String author;
 
+    private boolean userSchemaPackage;
+
     public String getAuthor() {
         return author;
     }
@@ -293,5 +295,13 @@ public class GeneratorConfig {
 
     public void setOverrideXML(boolean overrideXML) {
         this.overrideXML = overrideXML;
+    }
+
+    public boolean isUserSchemaPackage() {
+        return userSchemaPackage;
+    }
+
+    public void setUserSchemaPackage(boolean userSchemaPackage) {
+        this.userSchemaPackage = userSchemaPackage;
     }
 }

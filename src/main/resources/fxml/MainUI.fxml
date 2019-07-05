@@ -280,6 +280,8 @@
                                                                   text="生成toString/hashCode/equals方法"/>
                                                         <CheckBox fx:id="useSchemaPrefix" mnemonicParsing="false"
                                                                   selected="false" text="使用Schema前缀"/>
+                                                        <CheckBox fx:id="useSchemaPackage" mnemonicParsing="false"
+                                                                  selected="false" text="使用Schema子包名"/>
                                                     </children>
                                                 </HBox>
                                                 <HBox spacing="18.0">

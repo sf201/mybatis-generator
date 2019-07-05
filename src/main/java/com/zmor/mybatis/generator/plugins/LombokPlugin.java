@@ -29,8 +29,50 @@ public class LombokPlugin extends PluginAdapter {
         return true;
     }
 
+
+
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        //添加domain的import
+        topLevelClass.addImportedType("lombok.Data");
+//        topLevelClass.addImportedType("lombok.Builder");
+//        topLevelClass.addImportedType("lombok.NoArgsConstructor");
+//        topLevelClass.addImportedType("lombok.AllArgsConstructor");
+
+        //添加domain的注解
+        topLevelClass.addAnnotation("@Data");
+//        topLevelClass.addAnnotation("@Builder");
+//        topLevelClass.addAnnotation("@NoArgsConstructor");
+//        topLevelClass.addAnnotation("@AllArgsConstructor");
+
+        String remarks = "";
+        FullyQualifiedTable table = introspectedTable.getFullyQualifiedTable();
+        try {
+            Connection connection = new JDBCConnectionFactory(context.getJdbcConnectionConfiguration()).getConnection();
+            ResultSet rs = connection.createStatement().executeQuery(
+                    new StringBuilder().append("SHOW TABLE STATUS LIKE '")
+                            .append(table.getFullyQualifiedTableNameAtRuntime()).append("'").toString());
+
+            if (null != rs && rs.next()) {
+                remarks = rs.getString("COMMENT");
+            }
+            closeConnection(connection, rs);
+        } catch (SQLException e) {
+        }
+        //添加domain的注释
+        topLevelClass.addJavaDocLine("/**");
+        topLevelClass.addJavaDocLine("* " + remarks);
+        topLevelClass.addJavaDocLine("*");
+        topLevelClass.addJavaDocLine("* @author " + author);
+        topLevelClass.addJavaDocLine("* @date " + date2Str(new Date()));
+        topLevelClass.addJavaDocLine("*/");
+
+        return true;
+    }
+
+    @Override
+    public boolean modelPrimaryKeyClassGenerated(TopLevelClass topLevelClass,
+                                                 IntrospectedTable introspectedTable) {
         //添加domain的import
         topLevelClass.addImportedType("lombok.Data");
 //        topLevelClass.addImportedType("lombok.Builder");

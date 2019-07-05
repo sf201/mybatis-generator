@@ -83,6 +83,9 @@ public class MainUIController extends BaseFXController {
     @FXML
     private CheckBox useSchemaPrefix;
     @FXML
+    private CheckBox useSchemaPackage;
+
+    @FXML
     private TreeView<String> leftDBTree;
 
     // Current selected databaseConfig
@@ -214,6 +217,7 @@ public class MainUIController extends BaseFXController {
         useActualColumnNamesCheckbox.setTooltip(new Tooltip("是否使用数据库实际的列名作为实体类域的名称"));
         useTableNameAliasCheckbox.setTooltip(new Tooltip("在Mapper XML文件中表名使用别名，并且列全部使用as查询"));
         overrideXML.setTooltip(new Tooltip("重新生成时把原XML文件覆盖，否则是追加"));
+        useSchemaPackage.setTooltip(new Tooltip("使用schema或username做为包的子包名称，以进行分类，（特别对于oracle）。"));
     }
 
     void loadLeftDBTree() {
@@ -313,8 +317,10 @@ public class MainUIController extends BaseFXController {
             try {
                 GeneratorConfig generatorConfig = getGeneratorConfigFromUI();
                 generatorConfig.setName(name);
+                ConfigHelper.deleteGeneratorConfig(name);
                 ConfigHelper.saveGeneratorConfig(generatorConfig);
             } catch (Exception e) {
+                _LOG.error("删除配置失败",e);
                 AlertUtil.showErrorAlert("删除配置失败");
             }
         }
@@ -342,6 +348,7 @@ public class MainUIController extends BaseFXController {
         generatorConfig.setEncoding(encodingChoice.getValue());
         generatorConfig.setUseExampe(useExample.isSelected());
         generatorConfig.setUseSchemaPrefix(useSchemaPrefix.isSelected());
+        generatorConfig.setUserSchemaPackage(useSchemaPackage.isSelected());
         generatorConfig.setUseTkMapper(tkMapper.isSelected());
         generatorConfig.setLombok(lombok.isSelected());
         generatorConfig.setBaseMapper(baseMapper.getText());
@@ -365,6 +372,7 @@ public class MainUIController extends BaseFXController {
         lombok.setSelected(generatorConfig.isLombok());
         localDate.setSelected(generatorConfig.isLocalDate());
         author.setText(generatorConfig.getAuthor());
+        useSchemaPackage.setSelected(generatorConfig.isUserSchemaPackage());
     }
 
     @FXML

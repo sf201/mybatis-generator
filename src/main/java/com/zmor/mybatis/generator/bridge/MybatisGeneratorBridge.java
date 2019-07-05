@@ -64,6 +64,14 @@ public class MybatisGeneratorBridge {
         TableConfiguration tableConfig = new TableConfiguration(context);
         tableConfig.setTableName(generatorConfig.getTableName());
         tableConfig.setDomainObjectName(generatorConfig.getDomainObjectName());
+        String schemaName = selectedDatabaseConfig.getSchema();
+        if (DbType.MySQL.name().equals(selectedDatabaseConfig.getDbType())) {
+            schemaName = selectedDatabaseConfig.getSchema();
+        }else if(DbType.Oracle.name().equals(selectedDatabaseConfig.getDbType())) {
+            schemaName = selectedDatabaseConfig.getUsername();
+        }
+
+
         if (!generatorConfig.isUseExampe()) {
             tableConfig.setUpdateByExampleStatementEnabled(false);
             tableConfig.setCountByExampleStatementEnabled(false);
@@ -126,16 +134,32 @@ public class MybatisGeneratorBridge {
         jdbcConfig.setPassword(selectedDatabaseConfig.getPassword());
         // java model
         JavaModelGeneratorConfiguration modelConfig = new JavaModelGeneratorConfiguration();
-        modelConfig.setTargetPackage(generatorConfig.getModelPackage());
+        if (generatorConfig.isUserSchemaPackage()) {
+            //使用schema名做为包名
+            modelConfig.setTargetPackage(generatorConfig.getModelPackage() + "." + schemaName);
+        } else {
+            modelConfig.setTargetPackage(generatorConfig.getModelPackage());
+        }
+
         modelConfig.setTargetProject(generatorConfig.getProjectFolder() + "/" + generatorConfig.getModelPackageTargetFolder());
         // Mapper configuration
         SqlMapGeneratorConfiguration mapperConfig = new SqlMapGeneratorConfiguration();
-        mapperConfig.setTargetPackage(generatorConfig.getMappingXMLPackage());
+        if (generatorConfig.isUserSchemaPackage()) {
+            //使用schema名做为包名
+            mapperConfig.setTargetPackage(generatorConfig.getMappingXMLPackage() + "." + schemaName);
+        } else {
+            mapperConfig.setTargetPackage(generatorConfig.getMappingXMLPackage());
+        }
         mapperConfig.setTargetProject(generatorConfig.getProjectFolder() + "/" + generatorConfig.getMappingXMLTargetFolder());
         // DAO
         JavaClientGeneratorConfiguration daoConfig = new JavaClientGeneratorConfiguration();
         daoConfig.setConfigurationType("XMLMAPPER");
-        daoConfig.setTargetPackage(generatorConfig.getDaoPackage());
+        if (generatorConfig.isUserSchemaPackage()) {
+            //使用schema名做包名
+            daoConfig.setTargetPackage(generatorConfig.getDaoPackage() + "." + schemaName);
+        } else {
+            daoConfig.setTargetPackage(generatorConfig.getDaoPackage());
+        }
         daoConfig.setTargetProject(generatorConfig.getProjectFolder() + "/" + generatorConfig.getDaoTargetFolder());
 
 
