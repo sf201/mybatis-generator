@@ -16,7 +16,7 @@ import java.util.*;
 public class DbUtil {
 
     private static final Logger _LOG = LoggerFactory.getLogger(DbUtil.class);
-    private static final int DB_CONNECTION_TIMEOUTS_SECONDS = 1;
+    private static final int DB_CONNECTION_TIMEOUTS_SECONDS = 20;
 
     private static Map<DbType, Driver> drivers;
 
