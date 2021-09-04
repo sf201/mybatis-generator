@@ -31,7 +31,7 @@ public class BatchInsertPlugin extends PluginAdapter {
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
         XmlElement sql = new XmlElement("insert");
-        sql.addAttribute(new Attribute("id","insertBatch"));
+        sql.addAttribute(new Attribute("id","batchInsert"));
         sql.addAttribute(new Attribute("useGeneratedKeys","false"));
         XmlElement include = new XmlElement("include");
         include.addAttribute(new Attribute("refid", "Base_Column_List"));
@@ -65,7 +65,7 @@ public class BatchInsertPlugin extends PluginAdapter {
         FullyQualifiedJavaType listType = new FullyQualifiedJavaType(MessageFormat.format("List<{0}>", introspectedTable.getFullyQualifiedTable().getDomainObjectName()));
         Method insertBatch = new Method();
         insertBatch.setVisibility(JavaVisibility.PUBLIC);
-        insertBatch.setName("insertBatch");
+        insertBatch.setName("batchInsert");
         insertBatch.addParameter(new Parameter(listType, "list"));
         insertBatch.setReturnType(FullyQualifiedJavaType.getIntInstance());
         interfaze.addMethod(insertBatch);
