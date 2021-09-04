@@ -384,6 +384,9 @@ public class MainUIController extends BaseFXController {
         localDate.setSelected(generatorConfig.isLocalDate());
         author.setText(generatorConfig.getAuthor());
         useSchemaPackage.setSelected(generatorConfig.isUseSchemaPackage());
+        generateBaseColumnListA.setSelected(generatorConfig.isGenerateBaseColumnA());
+        generateBatchInsert.setSelected(generatorConfig.isGenerateBatchInsert());
+        useOracleSchema.setSelected(generatorConfig.isUseOracleSchema());
     }
 
     @FXML
