@@ -30,32 +30,38 @@ public class BatchInsertPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
-        XmlElement sql = new XmlElement("insert");
-        sql.addAttribute(new Attribute("id","batchInsert"));
-        sql.addAttribute(new Attribute("useGeneratedKeys","false"));
+        //insert xmlElement
+        XmlElement insert = new XmlElement("insert");
+        insert.addAttribute(new Attribute("id","batchInsert"));
+        insert.addAttribute(new Attribute("useGeneratedKeys","false"));
         XmlElement include = new XmlElement("include");
         include.addAttribute(new Attribute("refid", "Base_Column_List"));
-        sql.addElement(new TextElement(MessageFormat.format("insert into {0}(", introspectedTable.getFullyQualifiedTable().getIntrospectedTableName())));
-        sql.addElement(include);
-        sql.addElement(new TextElement(")"));
+        insert.addElement(new TextElement("begin"));
+//        sql.addElement(new TextElement(MessageFormat.format("insert into {0}(", introspectedTable.getFullyQualifiedTable().getIntrospectedTableName())));
+//        insert.addElement(include);
+//        sql.addElement(new TextElement(")"));
+
+        //foreach xmlElement
         XmlElement forEach = new XmlElement("foreach");
         forEach.addAttribute(new Attribute("collection", "list"));
         forEach.addAttribute(new Attribute("item", "item"));
         forEach.addAttribute(new Attribute("index", "index"));
-        forEach.addAttribute(new Attribute("separator", "union all"));
+        forEach.addAttribute(new Attribute("separator", ";"));
+        forEach.addElement(new TextElement(MessageFormat.format("insert into {0}(", introspectedTable.getFullyQualifiedTable().getIntrospectedTableName())));
+        forEach.addElement(include);
+        forEach.addElement(new TextElement(") values ("));
         StringBuilder sb = new StringBuilder();
-        sb.append("\tselect");
+//        sb.append("\t\t");
         for (IntrospectedColumn column : introspectedTable.getAllColumns()) {
             sb.append(System.lineSeparator()).append("\t\t");
-            sb.append("#{item.").append(column.getActualColumnName()).append(",")
+            sb.append("#{item.").append(column.getJavaProperty()).append(",")
             .append("jdbcType=").append(column.getJdbcTypeName()).append("},");
         }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(System.lineSeparator()).append("\t\t");
-        sb.append("from dual");
+        sb.deleteCharAt(sb.length() - 1).append(")");
         forEach.addElement(new TextElement(sb.toString()));
-        sql.addElement(forEach);
-        document.getRootElement().addElement(sql);
+        insert.addElement(forEach);
+        insert.addElement(new TextElement(";end;"));
+        document.getRootElement().addElement(insert);
         return super.sqlMapDocumentGenerated(document, introspectedTable);
     }
 
