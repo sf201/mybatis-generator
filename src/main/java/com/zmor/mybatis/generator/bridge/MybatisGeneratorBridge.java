@@ -134,7 +134,7 @@ public class MybatisGeneratorBridge {
         jdbcConfig.setPassword(selectedDatabaseConfig.getPassword());
         // java model
         JavaModelGeneratorConfiguration modelConfig = new JavaModelGeneratorConfiguration();
-        if (generatorConfig.isUserSchemaPackage()) {
+        if (generatorConfig.isUseSchemaPackage()) {
             //使用schema名做为包名
             modelConfig.setTargetPackage(generatorConfig.getModelPackage() + "." + schemaName);
         } else {
@@ -144,7 +144,7 @@ public class MybatisGeneratorBridge {
         modelConfig.setTargetProject(generatorConfig.getProjectFolder() + "/" + generatorConfig.getModelPackageTargetFolder());
         // Mapper configuration
         SqlMapGeneratorConfiguration mapperConfig = new SqlMapGeneratorConfiguration();
-        if (generatorConfig.isUserSchemaPackage()) {
+        if (generatorConfig.isUseSchemaPackage()) {
             //使用schema名做为包名
             mapperConfig.setTargetPackage(generatorConfig.getMappingXMLPackage() + "." + schemaName);
         } else {
@@ -154,7 +154,7 @@ public class MybatisGeneratorBridge {
         // DAO
         JavaClientGeneratorConfiguration daoConfig = new JavaClientGeneratorConfiguration();
         daoConfig.setConfigurationType("XMLMAPPER");
-        if (generatorConfig.isUserSchemaPackage()) {
+        if (generatorConfig.isUseSchemaPackage()) {
             //使用schema名做包名
             daoConfig.setTargetPackage(generatorConfig.getDaoPackage() + "." + schemaName);
         } else {
@@ -228,6 +228,23 @@ public class MybatisGeneratorBridge {
             PluginConfiguration pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.addProperty("author", generatorConfig.getAuthor());
             pluginConfiguration.setConfigurationType("com.zmor.mybatis.generator.plugins.LombokPlugin");
+            context.addPluginConfiguration(pluginConfiguration);
+        }
+
+        if (generatorConfig.isGenerateBaseColumnA()) {
+            PluginConfiguration pluginConfiguration = new PluginConfiguration();
+            pluginConfiguration.setConfigurationType("com.zmor.mybatis.generator.plugins.BaseColumnListAPlugin");
+            context.addPluginConfiguration(pluginConfiguration);
+        }
+        if (generatorConfig.isGenerateBatchInsert()) {
+            PluginConfiguration pluginConfiguration = new PluginConfiguration();
+            pluginConfiguration.setConfigurationType("com.zmor.mybatis.generator.plugins.BatchInsertPlugin");
+            context.addPluginConfiguration(pluginConfiguration);
+        }
+        if (generatorConfig.isUseOracleSchema()) {
+            tableConfig.setSchema(selectedDatabaseConfig.getUsername());
+            PluginConfiguration pluginConfiguration = new PluginConfiguration();
+            pluginConfiguration.setConfigurationType("com.zmor.mybatis.generator.plugins.OracleSchemaPlugin");
             context.addPluginConfiguration(pluginConfiguration);
         }
 

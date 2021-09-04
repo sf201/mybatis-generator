@@ -67,7 +67,10 @@ public class GeneratorConfig {
 
     private String author;
 
-    private boolean userSchemaPackage;
+    private boolean useSchemaPackage;
+    private boolean generateBaseColumnA;
+    private boolean generateBatchInsert;
+    private boolean useOracleSchema;
 
     public String getAuthor() {
         return author;
@@ -297,11 +300,35 @@ public class GeneratorConfig {
         this.overrideXML = overrideXML;
     }
 
-    public boolean isUserSchemaPackage() {
-        return userSchemaPackage;
+    public boolean isUseSchemaPackage() {
+        return useSchemaPackage;
     }
 
-    public void setUserSchemaPackage(boolean userSchemaPackage) {
-        this.userSchemaPackage = userSchemaPackage;
+    public void setUseSchemaPackage(boolean useSchemaPackage) {
+        this.useSchemaPackage = useSchemaPackage;
+    }
+
+    public boolean isGenerateBaseColumnA() {
+        return generateBaseColumnA;
+    }
+
+    public void setGenerateBaseColumnA(boolean generateBaseColumnA) {
+        this.generateBaseColumnA = generateBaseColumnA;
+    }
+
+    public boolean isGenerateBatchInsert() {
+        return generateBatchInsert;
+    }
+
+    public void setGenerateBatchInsert(boolean generateBatchInsert) {
+        this.generateBatchInsert = generateBatchInsert;
+    }
+
+    public boolean isUseOracleSchema() {
+        return useOracleSchema;
+    }
+
+    public void setUseOracleSchema(boolean useOracleSchema) {
+        this.useOracleSchema = useOracleSchema;
     }
 }
