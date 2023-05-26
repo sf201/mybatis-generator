@@ -1,7 +1,18 @@
 package com.zmor.mybatis.generator.controller;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.baomidou.mybatisplus.generator.AutoGenerator;
+import com.baomidou.mybatisplus.generator.InjectionConfig;
+import com.baomidou.mybatisplus.generator.config.*;
+import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
+import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.baomidou.mybatisplus.generator.config.rules.FileType;
+import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
+import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.zmor.mybatis.generator.bridge.MybatisGeneratorBridge;
 import com.zmor.mybatis.generator.model.DatabaseConfig;
+import com.zmor.mybatis.generator.model.DbType;
 import com.zmor.mybatis.generator.model.GeneratorConfig;
 import com.zmor.mybatis.generator.model.UITableColumnVO;
 import com.zmor.mybatis.generator.util.ConfigHelper;
@@ -30,10 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URL;
 import java.sql.SQLRecoverableException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class MainUIController extends BaseFXController {
 
@@ -87,9 +95,15 @@ public class MainUIController extends BaseFXController {
     @FXML
     private CheckBox generateBaseColumnListA;
     @FXML
+    private CheckBox generateMybatisPlus;
+    @FXML
+    private TextField parentPackage;
+    @FXML
     private CheckBox generateBatchInsert;
     @FXML
     private CheckBox useOracleSchema;
+    @FXML
+    private CheckBox useMPP;
 
     @FXML
     private TreeView<String> leftDBTree;
@@ -225,6 +239,8 @@ public class MainUIController extends BaseFXController {
         overrideXML.setTooltip(new Tooltip("重新生成时把原XML文件覆盖，否则是追加"));
         useSchemaPackage.setTooltip(new Tooltip("使用schema或username做为包的子包名称，以进行分类，（特别对于oracle）。"));
         generateBaseColumnListA.setTooltip(new Tooltip("在XML文件中，生成Base_Column_List_A,以a做为别名。"));
+        generateMybatisPlus.setTooltip(new Tooltip("是否生成mybatisPlus代码，将使用mybatisPlus代码生成器生成代码。"));
+        parentPackage.setTooltip(new Tooltip("生成mybatisPlus代码时，所有项目父包"));
         generateBatchInsert.setTooltip(new Tooltip("是否生成batchInsert方法（仅对于oracle）。"));
     }
 
@@ -273,21 +289,183 @@ public class MainUIController extends BaseFXController {
         if (!checkDirs(generatorConfig)) {
             return;
         }
-
-        MybatisGeneratorBridge bridge = new MybatisGeneratorBridge();
-        bridge.setGeneratorConfig(generatorConfig);
-        bridge.setDatabaseConfig(selectedDatabaseConfig);
-        bridge.setIgnoredColumns(ignoredColumns);
-        bridge.setColumnOverrides(columnOverrides);
-        UIProgressCallback alert = new UIProgressCallback(Alert.AlertType.INFORMATION);
-        bridge.setProgressCallback(alert);
-        alert.show();
-        try {
-            bridge.generate();
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtil.showErrorAlert(e.getMessage());
+        if (generatorConfig.isGenerateMybatisPlus()) {
+            //生成mybatisPlus代码
+            try {
+                mybatisPlusGenerator(generatorConfig);
+                AlertUtil.showInfoAlert("代码生成成功!");
+            } catch (Exception e) {
+                e.printStackTrace();
+                AlertUtil.showErrorAlert(e.getMessage());
+            }
+        } else {
+            MybatisGeneratorBridge bridge = new MybatisGeneratorBridge();
+            bridge.setGeneratorConfig(generatorConfig);
+            bridge.setDatabaseConfig(selectedDatabaseConfig);
+            bridge.setIgnoredColumns(ignoredColumns);
+            bridge.setColumnOverrides(columnOverrides);
+            UIProgressCallback alert = new UIProgressCallback(Alert.AlertType.INFORMATION);
+            bridge.setProgressCallback(alert);
+            alert.show();
+            try {
+                bridge.generate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                AlertUtil.showErrorAlert(e.getMessage());
+            }
         }
+
+    }
+
+    private void mybatisPlusGenerator(GeneratorConfig generatorConfig) throws ClassNotFoundException {
+        // 代码生成器
+        AutoGenerator mpg = new AutoGenerator();
+
+        // 全局配置
+        GlobalConfig gc = new GlobalConfig();
+        String projectPath = generatorConfig.getProjectFolder();
+        gc.setOutputDir(projectPath + File.separator +  generatorConfig.getModelPackageTargetFolder());
+//        gc.setSwagger2(cbEnableSwagger.isSelected());
+//        if(cbAutoKey.isSelected()){
+//            gc.setIdType(IdType.AUTO);
+//        }else {
+//            gc.setIdType(IdType.INPUT);
+//        }
+        gc.setIdType(IdType.INPUT);
+        gc.setAuthor(generatorConfig.getAuthor());
+        gc.setMapperName("%sMapper");
+        gc.setFileOverride(generatorConfig.isOverrideXML());
+        gc.setOpen(false);
+        gc.setBaseResultMap(true);
+        gc.setBaseColumnList(true);
+        mpg.setGlobalConfig(gc);
+
+        // 数据源配置
+        DbType dbType = DbType.valueOf(selectedDatabaseConfig.getDbType());
+        DataSourceConfig dsc = new DataSourceConfig();
+        dsc.setUrl(DbUtil.getConnectionUrlWithSchema(selectedDatabaseConfig));
+        // dsc.setSchemaName("public");
+        dsc.setDriverName(dbType.getDriverClass());
+        dsc.setUsername(selectedDatabaseConfig.getUsername());
+        dsc.setPassword(selectedDatabaseConfig.getPassword());
+        mpg.setDataSource(dsc);
+
+        // 包配置
+        PackageConfig pc = new PackageConfig();
+        // 设置模块名
+//        pc.setModuleName(txtModuleName.getText().trim());
+        pc.setParent(generatorConfig.getParentPackage());
+        pc.setMapper(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getDaoPackage()) );
+        pc.setEntity(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getModelPackage()));
+        mpg.setPackageInfo(pc);
+
+        // 自定义配置
+        InjectionConfig cfg = new InjectionConfig() {
+            @Override
+            public void initMap() {
+                Map<String, Object> map = new HashMap<>();
+                map.put("basePackage", generatorConfig.getBaseMapper());
+                this.setMap(map);
+            }
+        };
+        List<FileOutConfig> focList = new ArrayList<>();
+        focList.add(new FileOutConfig("templates/mapper.xml.ftl") {
+            @Override
+            public String outputFile(TableInfo tableInfo) {
+                // 自定义输入文件名称
+                return projectPath +"/"+ generatorConfig.getMappingXMLTargetFolder()+"/" + pc.getModuleName()
+                        + "/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
+            }
+        });
+        cfg.setFileOutConfigList(focList);
+
+        cfg.setFileCreate(new IFileCreate() {
+            @Override
+            public boolean isCreate(ConfigBuilder configBuilder, FileType fileType, String filePath) {
+                boolean isCreate = true;
+
+                //覆盖generator core 方法
+                if(FileType.CONTROLLER.equals(fileType)){
+                    isCreate = false;
+                }else if(FileType.ENTITY.equals(fileType)){
+                    isCreate = true;
+                }else if(FileType.MAPPER.equals(fileType)){
+                    isCreate = true;
+                }else if(FileType.OTHER.equals(fileType)){
+                    //XML = OTHER 有些惊奇
+                    isCreate = true;
+                }else if(FileType.SERVICE.equals(fileType) || FileType.SERVICE_IMPL.equals(fileType)){
+                    isCreate = false;
+                }
+
+                // 全局判断【默认】
+                if(isCreate){
+                    File file = new File(filePath);
+                    boolean exist = file.exists();
+                    if (!exist) {
+                        file.getParentFile().mkdirs();
+                    }
+                }
+
+                return isCreate;
+            }
+        });
+
+        mpg.setCfg(cfg);
+        TemplateConfig tc = new TemplateConfig();
+        tc.setXml("templates/mymapper.xml");
+        tc.setMapper("templates/mymapper.java");
+        if (generatorConfig.isUseMPP()) {
+            tc.setEntity("templates/mppentity.java");
+        }
+        mpg.setTemplate(tc);
+
+        // 策略配置
+        StrategyConfig strategy = new StrategyConfig();
+        strategy.setNaming(NamingStrategy.underline_to_camel);
+        strategy.setColumnNaming(NamingStrategy.underline_to_camel);
+//        strategy.setSuperEntityClass("com.baomidou.mybatisplus.samples.generator.common.BaseEntity");
+        strategy.setEntityLombokModel(generatorConfig.isLombok());
+
+
+//        if(StringUtils.isNotBlank(txtSuperController.getText())){
+//            //设置BaseController
+//            strategy.setSuperControllerClass(txtSuperController.getText());
+//        }
+
+//        if(StringUtils.isNotBlank(txtLogicDeletedField.getText())){
+//            //设置逻辑删除栏位
+//            strategy.setLogicDeleteFieldName(txtLogicDeletedField.getText().trim());
+//        }
+
+        //把ListView 的数据转成 数组
+        List<String> lstTable = new ArrayList<>(16);
+        lstTable.add(generatorConfig.getTableName());
+        String[] arrTable = lstTable.toArray(new String[lstTable.size()]);
+
+        strategy.setEntityColumnConstant(true);
+        strategy.setInclude(arrTable);
+//        strategy.setSuperEntityColumns("id");
+        strategy.setControllerMappingHyphenStyle(true);
+
+//        if(StringUtils.isNotBlank(txtTablePrefix.getText())){
+//            strategy.setTablePrefix(txtTablePrefix.getText());
+//        }
+        mpg.setStrategy(strategy);
+        // 选择 freemarker 引擎需要指定如下加，注意 pom 依赖必须有！
+        mpg.setTemplateEngine(new FreemarkerTemplateEngine());
+        mpg.execute();
+    }
+
+    private String getMybatisPlusChildPackageName(String parentPackage, String childPackage) {
+        if (StringUtils.isAnyEmpty(parentPackage, childPackage)) {
+            return childPackage;
+        }
+        //子包包含父包，且比父包更长
+        if (childPackage.contains(parentPackage)&&childPackage.length()>parentPackage.length()) {
+            return childPackage.replace(parentPackage, "").substring(1);
+        }
+        return childPackage;
     }
 
     private String validateConfig() {
@@ -360,6 +538,9 @@ public class MainUIController extends BaseFXController {
         generatorConfig.setGenerateBaseColumnA(generateBaseColumnListA.isSelected());
         generatorConfig.setGenerateBatchInsert(generateBatchInsert.isSelected());
         generatorConfig.setUseOracleSchema(useOracleSchema.isSelected());
+        generatorConfig.setGenerateMybatisPlus(generateMybatisPlus.isSelected());
+        generatorConfig.setParentPackage(parentPackage.getText());
+        generatorConfig.setUseMPP(useMPP.isSelected());
         generatorConfig.setUseTkMapper(tkMapper.isSelected());
         generatorConfig.setLombok(lombok.isSelected());
         generatorConfig.setBaseMapper(baseMapper.getText());
@@ -385,6 +566,9 @@ public class MainUIController extends BaseFXController {
         author.setText(generatorConfig.getAuthor());
         useSchemaPackage.setSelected(generatorConfig.isUseSchemaPackage());
         generateBaseColumnListA.setSelected(generatorConfig.isGenerateBaseColumnA());
+        generateMybatisPlus.setSelected(generatorConfig.isGenerateMybatisPlus());
+        parentPackage.setText(generatorConfig.getParentPackage());
+        useMPP.setSelected(generatorConfig.isUseMPP());
         generateBatchInsert.setSelected(generatorConfig.isGenerateBatchInsert());
         useOracleSchema.setSelected(generatorConfig.isUseOracleSchema());
     }

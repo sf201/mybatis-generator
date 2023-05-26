@@ -80,7 +80,7 @@
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                                         <RowConstraints maxHeight="72.0" minHeight="10.0" prefHeight="56.0"
                                                         vgrow="SOMETIMES"/>
-                                        <RowConstraints maxHeight="140.0" minHeight="8.0" prefHeight="140.0"
+                                        <RowConstraints maxHeight="180.0" minHeight="8.0" prefHeight="180.0"
                                                         vgrow="SOMETIMES"/>
                                         <RowConstraints maxHeight="99.0" minHeight="11.0" prefHeight="43.0"/>
                                     </rowConstraints>
@@ -307,6 +307,28 @@
                                                               selected="false" text="生成batchInsert方法"/>
                                                     <CheckBox fx:id="useOracleSchema" mnemonicParsing="false"
                                                               selected="false" text="Oracle生成Schema"/>
+                                                </children>
+                                            </HBox>
+                                                <HBox spacing="18.0">
+                                                <children>
+                                                    <CheckBox fx:id="generateMybatisPlus"
+                                                              mnemonicParsing="false" selected="false"
+                                                              text="生成mybatisPlus代码"/>
+                                                    <Label text="父包名" GridPane.rowIndex="4"/>
+                                                    <TextField fx:id="parentPackage" prefHeight="27.0" prefWidth="152.0"
+                                                               promptText="com.example" GridPane.columnIndex="1"
+                                                               GridPane.rowIndex="4">
+                                                        <HBox.margin>
+                                                            <Insets right="5.0"/>
+                                                        </HBox.margin>
+                                                        <GridPane.margin>
+                                                            <Insets left="5.0" right="5.0"/>
+                                                        </GridPane.margin>
+                                                    </TextField>
+
+                                                    <CheckBox fx:id="useMPP"
+                                                              mnemonicParsing="false" selected="false"
+                                                              text="使用MPP(mybatisplus-plus)"/>
                                                 </children>
                                             </HBox>
                                             </children>

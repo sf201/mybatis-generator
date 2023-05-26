@@ -24,6 +24,10 @@ mybatis-generator是基于[mybatis generator](http://www.mybatis.org/generator/i
 * 方法一: 自助构建
 
 ```bash
+    先安装本地ojdbc14
+    切换到lib目录，使用cmd
+    mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14 -Dversion=10.2.0.1.0 -Dpackaging=jar -Dfile=ojdbc14.jar
+
     git clone https://github.com/astarring/mybatis-generator-gui
     cd mybatis-generator-gui
     mvn jfx:jar

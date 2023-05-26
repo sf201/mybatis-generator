@@ -71,6 +71,34 @@ public class GeneratorConfig {
     private boolean generateBaseColumnA;
     private boolean generateBatchInsert;
     private boolean useOracleSchema;
+    private boolean generateMybatisPlus;
+    private String parentPackage;
+
+    public boolean isUseMPP() {
+        return useMPP;
+    }
+
+    public void setUseMPP(boolean useMPP) {
+        this.useMPP = useMPP;
+    }
+
+    private boolean useMPP;
+
+    public String getParentPackage() {
+        return parentPackage;
+    }
+
+    public void setParentPackage(String parentPackage) {
+        this.parentPackage = parentPackage;
+    }
+
+    public boolean isGenerateMybatisPlus() {
+        return generateMybatisPlus;
+    }
+
+    public void setGenerateMybatisPlus(boolean generateMybatisPlus) {
+        this.generateMybatisPlus = generateMybatisPlus;
+    }
 
     public String getAuthor() {
         return author;
