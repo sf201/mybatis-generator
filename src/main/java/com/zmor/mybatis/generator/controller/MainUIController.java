@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.InjectionConfig;
 import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
+import com.baomidou.mybatisplus.generator.config.converts.OracleTypeConvert;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.FileType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
@@ -335,6 +337,9 @@ public class MainUIController extends BaseFXController {
         gc.setAuthor(generatorConfig.getAuthor());
         gc.setMapperName("%sMapper");
         gc.setFileOverride(generatorConfig.isOverrideXML());
+        if (!generatorConfig.isLocalDate()) {
+            gc.setDateType(DateType.ONLY_DATE);
+        }
         gc.setOpen(false);
         gc.setBaseResultMap(true);
         gc.setBaseColumnList(true);
@@ -345,6 +350,7 @@ public class MainUIController extends BaseFXController {
         DataSourceConfig dsc = new DataSourceConfig();
         dsc.setUrl(DbUtil.getConnectionUrlWithSchema(selectedDatabaseConfig));
         // dsc.setSchemaName("public");
+        dsc.setTypeConvert(new OracleTypeConvert());
         dsc.setDriverName(dbType.getDriverClass());
         dsc.setUsername(selectedDatabaseConfig.getUsername());
         dsc.setPassword(selectedDatabaseConfig.getPassword());
