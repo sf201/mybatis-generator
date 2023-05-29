@@ -36,7 +36,11 @@ import lombok.experimental.Accessors;
     </#if>
 </#if>
 <#if table.convert>
+    <#if cfg.useSchema>
+@TableName(value = "${table.name}",schema="${datasource.schemaName}")
+    <#else>
 @TableName("${table.name}")
+    </#if>
 </#if>
 <#if swagger2>
 @ApiModel(value="${entity}对象", description="${table.comment!}")

@@ -356,6 +356,7 @@ public class MainUIController extends BaseFXController {
 //        pc.setModuleName(txtModuleName.getText().trim());
         pc.setParent(generatorConfig.getParentPackage());
         pc.setMapper(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getDaoPackage()) );
+        pc.setXml(null);
         pc.setEntity(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getModelPackage()));
         mpg.setPackageInfo(pc);
 
@@ -365,6 +366,11 @@ public class MainUIController extends BaseFXController {
             public void initMap() {
                 Map<String, Object> map = new HashMap<>();
                 map.put("basePackage", generatorConfig.getBaseMapper());
+                if (generatorConfig.isUseOracleSchema()) {
+                    map.put("useSchema", true);
+                } else {
+                    map.put("useSchema", false);
+                }
                 this.setMap(map);
             }
         };
