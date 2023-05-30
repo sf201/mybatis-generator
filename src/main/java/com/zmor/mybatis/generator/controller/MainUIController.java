@@ -360,10 +360,13 @@ public class MainUIController extends BaseFXController {
         PackageConfig pc = new PackageConfig();
         // 设置模块名
 //        pc.setModuleName(txtModuleName.getText().trim());
-        pc.setParent(generatorConfig.getParentPackage());
-        pc.setMapper(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getDaoPackage()) );
-        pc.setXml(null);
-        pc.setEntity(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getModelPackage()));
+        pc.setParent("");
+//        pc.setParent(generatorConfig.getParentPackage());
+        pc.setMapper(generatorConfig.getDaoPackage() );
+        pc.setEntity(generatorConfig.getModelPackage());
+        pc.setXml("");
+//        pc.setMapper(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getDaoPackage()) );
+//        pc.setEntity(getMybatisPlusChildPackageName(generatorConfig.getParentPackage(),generatorConfig.getModelPackage()));
         mpg.setPackageInfo(pc);
 
         // 自定义配置
@@ -381,7 +384,7 @@ public class MainUIController extends BaseFXController {
             }
         };
         List<FileOutConfig> focList = new ArrayList<>();
-        focList.add(new FileOutConfig("templates/mapper.xml.ftl") {
+        focList.add(new FileOutConfig("templates/mymapper.xml.ftl") {
             @Override
             public String outputFile(TableInfo tableInfo) {
                 // 自定义输入文件名称
@@ -425,7 +428,10 @@ public class MainUIController extends BaseFXController {
 
         mpg.setCfg(cfg);
         TemplateConfig tc = new TemplateConfig();
-        tc.setXml("templates/mymapper.xml");
+        tc.setXml(null);
+        tc.setController(null);
+        tc.setService(null);
+        tc.setServiceImpl(null);
         tc.setMapper("templates/mymapper.java");
         if (generatorConfig.isUseMPP()) {
             tc.setEntity("templates/mppentity.java");
