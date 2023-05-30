@@ -56,6 +56,17 @@ public class ${entity} implements Serializable {
 <#if entitySerialVersionUID>
     private static final long serialVersionUID = 1L;
 </#if>
+<#assign keyCnt = 0>
+<#--计算主键个数-->
+<#list table.fields as field>
+<#--    主键个数已经大于1 ，直接跳出循环，此时即使用mpp注解-->
+    <#if keyCnt gt 1 >
+        <#break >
+    </#if>
+    <#if field.keyFlag>
+        <#assign keyCnt = keyCnt + 1/>
+    </#if>
+</#list>
 <#-- ----------  BEGIN 字段循环遍历  ---------->
 <#list table.fields as field>
     <#if field.keyFlag>
@@ -72,8 +83,13 @@ public class ${entity} implements Serializable {
         </#if>
     </#if>
     <#if field.keyFlag>
-    <#-- 主键 -->
+    <#if keyCnt=1>
+    <#-- 只有一个主键 -->
+    @TableId("${field.annotationColumnName}")
+    <#else>
+    <#-- 多主键 -->
     @MppMultiId("${field.annotationColumnName}")
+    </#if>
     <#-- 普通字段 -->
     <#elseif field.fill??>
     <#-- -----   存在字段填充设置   ----->
