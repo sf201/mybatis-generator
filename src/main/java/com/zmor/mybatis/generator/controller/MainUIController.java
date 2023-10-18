@@ -435,6 +435,8 @@ public class MainUIController extends BaseFXController {
         tc.setMapper("templates/mymapper.java");
         if (generatorConfig.isUseMPP()) {
             tc.setEntity("templates/mppentity.java");
+        } else {
+            tc.setEntity("templates/myentity.java");
         }
         mpg.setTemplate(tc);
 
